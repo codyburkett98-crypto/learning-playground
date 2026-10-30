@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Daily Dashboard</title>
+  <style>
+    :root {
+      --bg-top: #e8f0f4;
+      --bg-bottom: #f7f5f1;
+      --surface: rgba(255, 255, 255, 0.72);
+      --ink: #1c2a32;
+      --muted: #5a6b75;
+      --accent: #0d7a6f;
+      --accent-soft: #d6efeb;
+      --border: rgba(28, 42, 50, 0.1);
+      --shadow: 0 12px 40px rgba(28, 42, 50, 0.08);
+      --radius: 16px;
+      --font: "Avenir Next", "Segoe UI", Candara, Calibri, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse 80% 50% at 10% -10%, #c5e4df 0%, transparent 55%),
+        radial-gradient(ellipse 70% 45% at 100% 0%, #d5e4f0 0%, transparent 50%),
+        linear-gradient(165deg, var(--bg-top), var(--bg-bottom));
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap {
+      width: min(560px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 2.5rem 0 3.5rem;
+    }
+
+    header {
+      margin-bottom: 2rem;
+      animation: rise 0.55s ease both;
+    }
+
+    h1 {
+      margin: 0 0 0.35rem;
+      font-size: clamp(1.85rem, 5vw, 2.35rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+
+    .date {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .panel {
+      background: var(--surface);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.35rem 1.4rem;
+      margin-bottom: 1rem;
+      animation: rise 0.55s ease both;
+    }
+
+    .panel:nth-of-type(1) { animation-delay: 0.06s; }
+    .panel:nth-of-type(2) { animation-delay: 0.12s; }
+    .panel:nth-of-type(3) { animation-delay: 0.18s; }
+    .panel:nth-of-type(4) { animation-delay: 0.24s; }
+
+    .panel h2 {
+      margin: 0 0 1rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .check-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      cursor: pointer;
+      user-select: none;
+      padding: 0.55rem 0.65rem;
+      margin: -0.55rem -0.65rem;
+      border-radius: 12px;
+      transition: background 0.2s ease;
+    }
+
+    .check:hover {
+      background: rgba(13, 122, 111, 0.06);
+    }
+
+    .check input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .box {
+      flex-shrink: 0;
+      width: 1.35rem;
+      height: 1.35rem;
+      border: 2px solid rgba(28, 42, 50, 0.28);
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+    }
+
+    .box svg {
+      width: 0.85rem;
+      height: 0.85rem;
+      opacity: 0;
+      transform: scale(0.6);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      stroke: white;
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .check input:checked + .box {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .check input:checked + .box svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .check input:focus-visible + .box {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .check span {
+      font-size: 1.05rem;
+      font-weight: 550;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .field label {
+      font-size: 0.95rem;
+      font-weight: 550;
+    }
+
+    .field input[type="number"],
+    .field textarea {
+      width: 100%;
+      font: inherit;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 0.9rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .field input[type="number"]:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .field textarea {
+      min-height: 8rem;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+      margin-top: 0.85rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .progress-meta strong {
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bar {
+      margin-top: 0.55rem;
+      height: 10px;
+      background: rgba(28, 42, 50, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar > i {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #0d7a6f, #2aa39a);
+      border-radius: inherit;
+      transition: width 0.35s ease;
+    }
+
+    .save-hint {
+      text-align: center;
+      margin-top: 1.25rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      animation: rise 0.55s ease 0.3s both;
+    }
+
+    .save-hint.visible {
+      opacity: 1;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 420px) {
+      .wrap {
+        width: calc(100% - 1.25rem);
+        padding-top: 1.75rem;
+      }
+
+      .panel {
+        padding: 1.15rem 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Daily Dashboard</h1>
+      <p class="date" id="dateLabel"></p>
+    </header>
+
+    <section class="panel" aria-labelledby="habits-heading">
+      <h2 id="habits-heading">Habits</h2>
+      <div class="check-list">
+        <label class="check">
+          <input type="checkbox" id="workout" />
+          <span class="box" aria-hidden="true">
+            <svg viewBox="0 0 16 16"><polyline points="3.5 8.5 6.5 11.5 12.5 4.5" /></svg>
+          </span>
+          <span>Workout done</span>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="morningSkincare" />
+          <span class="box" aria-hidden="true">
+            <svg viewBox="0 0 16 16"><polyline points="3.5 8.5 6.5 11.5 12.5 4.5" /></svg>
+          </span>
+          <span>Morning skincare</span>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="eveningSkincare" />
+          <span class="box" aria-hidden="true">
+            <svg viewBox="0 0 16 16"><polyline points="3.5 8.5 6.5 11.5 12.5 4.5" /></svg>
+          </span>
+          <span>Evening skincare</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="steps-heading">
+      <h2 id="steps-heading">Steps</h2>
+      <div class="field">
+        <label for="steps">Today's steps</label>
+        <input type="number" id="steps" min="0" step="1" inputmode="numeric" placeholder="0" />
+      </div>
+      <div class="progress-meta">
+        <span>Goal: 10,000</span>
+        <strong id="stepsPercent">0%</strong>
+      </div>
+      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="stepsBar">
+        <i id="stepsFill"></i>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="earnings-heading">
+      <h2 id="earnings-heading">Earnings</h2>
+      <div class="field">
+        <label for="uberEarnings">Uber earnings ($)</label>
+        <input type="number" id="uberEarnings" min="0" step="0.01" inputmode="decimal" placeholder="0.00" />
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="notes-heading">
+      <h2 id="notes-heading">Notes</h2>
+      <div class="field">
+        <label for="notes" class="visually-hidden" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0">Notes</label>
+        <textarea id="notes" placeholder="Jot anything for today…"></textarea>
+      </div>
+    </section>
+
+    <p class="save-hint" id="saveHint">Saved automatically</p>
+  </div>
+
+  <script>
+    (function () {
+      var STEP_GOAL = 10000;
+      var todayKey = "dailyDashboard:" + new Date().toISOString().slice(0, 10);
+
+      var workout = document.getElementById("workout");
+      var morningSkincare = document.getElementById("morningSkincare");
+      var eveningSkincare = document.getElementById("eveningSkincare");
+      var steps = document.getElementById("steps");
+      var uberEarnings = document.getElementById("uberEarnings");
+      var notes = document.getElementById("notes");
+      var stepsPercent = document.getElementById("stepsPercent");
+      var stepsFill = document.getElementById("stepsFill");
+      var stepsBar = document.getElementById("stepsBar");
+      var saveHint = document.getElementById("saveHint");
+      var dateLabel = document.getElementById("dateLabel");
+      var saveTimer = null;
+
+      dateLabel.textContent = new Date().toLocaleDateString(undefined, {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric"
+      });
+
+      function readState() {
+        return {
+          workout: workout.checked,
+          morningSkincare: morningSkincare.checked,
+          eveningSkincare: eveningSkincare.checked,
+          steps: steps.value === "" ? "" : String(steps.value),
+          uberEarnings: uberEarnings.value === "" ? "" : String(uberEarnings.value),
+          notes: notes.value
+        };
+      }
+
+      function updateStepsProgress() {
+        var value = Number(steps.value) || 0;
+        if (value < 0) value = 0;
+        var pct = Math.min(100, Math.round((value / STEP_GOAL) * 100));
+        stepsPercent.textContent = pct + "%";
+        stepsFill.style.width = pct + "%";
+        stepsBar.setAttribute("aria-valuenow", String(pct));
+      }
+
+      function showSaved() {
+        saveHint.classList.add("visible");
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(function () {
+          saveHint.classList.remove("visible");
+        }, 1200);
+      }
+
+      function save() {
+        try {
+          localStorage.setItem(todayKey, JSON.stringify(readState()));
+          showSaved();
+        } catch (err) {
+          console.warn("Could not save dashboard data", err);
+        }
+      }
+
+      function load() {
+        try {
+          var raw = localStorage.getItem(todayKey);
+          if (!raw) {
+            updateStepsProgress();
+            return;
+          }
+          var data = JSON.parse(raw);
+          workout.checked = !!data.workout;
+          morningSkincare.checked = !!data.morningSkincare;
+          eveningSkincare.checked = !!data.eveningSkincare;
+          steps.value = data.steps != null ? data.steps : "";
+          uberEarnings.value = data.uberEarnings != null ? data.uberEarnings : "";
+          notes.value = data.notes || "";
+        } catch (err) {
+          console.warn("Could not load dashboard data", err);
+        }
+        updateStepsProgress();
+      }
+
+      [workout, morningSkincare, eveningSkincare].forEach(function (el) {
+        el.addEventListener("change", save);
+      });
+
+      steps.addEventListener("input", function () {
+        updateStepsProgress();
+        save();
+      });
+
+      uberEarnings.addEventListener("input", save);
+      notes.addEventListener("input", save);
+
+      load();
+    })();
+  </script>
+</body>
+</html>
