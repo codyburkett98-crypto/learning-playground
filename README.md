@@ -11,3 +11,8 @@ I'm learning Cursor, Git, and how to build things.
 - Getting comfortable with the basics
 
 - Building small useful projects
+
+## Notes
+
+- First successful push: done
+- Next goal: keep practicing small changes
